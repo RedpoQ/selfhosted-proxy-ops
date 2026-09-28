@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "selfhosted-proxy-ops",
+  "name": "vps-proxy-ops",
   "version": "0.1.0",
-  "description": "Evidence-driven workflows for building, validating, benchmarking, governing, and freezing self-hosted proxy stacks.",
+  "description": "Evidence-driven workflows for evaluating VPS paths, operating proxy stacks, testing transports, governing clients, and deciding when to freeze changes.",
   "license": "MIT",
   "keywords": [
     "vps",
