@@ -1,4 +1,4 @@
-# selfhosted-proxy-ops
+# vps-proxy-ops
 
 A staged, evidence-driven operational framework for building, testing, governing, and freezing self-hosted proxy stacks.
 
