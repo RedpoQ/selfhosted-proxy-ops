@@ -1,0 +1,3 @@
+protocol,success_rate,connect_p95_ms,ttfb_p95_ms,throughput_mbps,data_class
+A,100,120,240,80,SYNTHETIC_DATA
+B,98,160,310,60,SYNTHETIC_DATA

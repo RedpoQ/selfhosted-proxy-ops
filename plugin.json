@@ -1,0 +1,16 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "selfhosted-proxy-ops",
+  "version": "0.1.0",
+  "description": "Evidence-driven workflows for building, validating, benchmarking, governing, and freezing self-hosted proxy stacks.",
+  "license": "MIT",
+  "keywords": [
+    "vps",
+    "proxy",
+    "xray",
+    "mihomo",
+    "clash",
+    "networking",
+    "self-hosted"
+  ]
+}
