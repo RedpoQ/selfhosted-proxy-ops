@@ -1,12 +1,61 @@
 # vps-proxy-ops
 
+Use eight Agent Skills to diagnose self-hosted VPS proxy issues across 3X-UI / Xray and Clash Verge / Mihomo, then validate changes with isolated tests and end-to-end acceptance.
+
+[中文说明](README.md) · Chinese-first VPS Proxy Ops
+
+## When to use
+
+- Start or troubleshoot a VPS proxy stack when the failing layer is unclear.
+- Reconcile panel state, subscriptions, Xray runtime, client DNS, TUN, and rules.
+- Compare Reality, Hysteria2, TUIC, XHTTP, or Cloudflare edges through isolated tests.
+- Validate server-side static/residential egress and ordinary-route isolation.
+
+Windows client workflows and Linux VPS checks are environment-specific references; Linux client coverage is partial. See the support matrix below.
+
+## 30-second Quick Start
+
+Download or clone this repository, then give an Agent with local file access this prompt:
+
+```bash
+git clone https://github.com/RedpoQ/vps-proxy-ops.git
+```
+
+```text
+Read vps-proxy-ops/README.en.md and
+vps-proxy-ops/skills/proxy-stack-lifecycle/SKILL.md. Start with read-only discovery.
+Ask for missing client, VPS, panel, and symptom information; check whether the Agent
+uses the proxy being investigated. Report facts, inferences, unknowns, lifecycle
+stage, blockers, and the next Skill. Do not request passwords, private keys, or
+full subscriptions. Do not install software, restart services, or change production
+configuration. Present baseline, backup, rollback, and validation before any change,
+and wait for my explicit authorization.
+```
+
+This starts workflow discovery. If local files are inaccessible, open a linked Skill below for manual reading. Portable plugin installation and automatic model activation remain unverified. Agents with existing Skills integration can invoke `proxy-stack-lifecycle` by name.
+
+## Eight-Skill routing table
+
+Start at the lifecycle entry for ambiguous work; route a clearly bounded problem directly to its owner and load only the references needed for that branch.
+
+| Skill | Responsibility |
+|---|---|
+| [`proxy-stack-lifecycle`](skills/proxy-stack-lifecycle/SKILL.md) | Discover the current stage, constraints, blockers, and next workflow without mutating systems. |
+| [`vps-region-fit`](skills/vps-region-fit/SKILL.md) | Measure contamination-aware user-to-region and VPS-to-destination path quality. |
+| [`vps-baseline`](skills/vps-baseline/SKILL.md) | Establish Linux VPS correctness before protocol work or tuning. |
+| [`xui-xray-stack`](skills/xui-xray-stack/SKILL.md) | Govern the implemented 3X-UI + Xray adapter and its source-of-truth layers. |
+| [`proxy-transport-lab`](skills/proxy-transport-lab/SKILL.md) | Run isolated transport experiments, benchmarks, ablations, and progressive tests. |
+| [`special-egress-routing`](skills/special-egress-routing/SKILL.md) | Prove both positive special routing and negative ordinary-route isolation. |
+| [`proxy-client-governance`](skills/proxy-client-governance/SKILL.md) | Reconcile application settings, generated config, runtime, and observed client traffic. |
+| [`proxy-stack-acceptance`](skills/proxy-stack-acceptance/SKILL.md) | Decide readiness, security status, remaining gaps, rollback confidence, and freeze. |
+
+## Evidence-driven framework
+
 A staged, evidence-driven operational framework for building, testing, governing, and freezing self-hosted proxy stacks.
 
 This project addresses a common operational problem: a proxy can appear correct in a panel or configuration file while its generated configuration, runtime state, client projection, or observed traffic says otherwise. The repository supplies eight composable Skills that make those layers explicit and keep production changes behind evidence and rollback gates.
 
 It is not a turnkey installer, a provider recommendation, a performance-ranking claim, or a security-hardening substitute. It ships no MCP server, credentials, production scripts, or default infrastructure topology.
-
-[简体中文](README.md)
 
 ## Core lifecycle
 
@@ -25,18 +74,7 @@ Cross-cutting methodology includes baseline-before-mutation, capability discover
 
 See [architecture](docs/architecture.md), [lifecycle](docs/lifecycle.md), and the public-safe [evidence inventory](docs/evidence-inventory.md).
 
-## Skills
-
-| Skill | Responsibility |
-|---|---|
-| `proxy-stack-lifecycle` | Discover the current stage, constraints, blockers, and next workflow without mutating systems. |
-| `vps-region-fit` | Measure contamination-aware user-to-region and VPS-to-destination path quality. |
-| `vps-baseline` | Establish Linux VPS correctness before protocol work or tuning. |
-| `xui-xray-stack` | Govern the implemented 3X-UI + Xray adapter and its source-of-truth layers. |
-| `proxy-transport-lab` | Run isolated transport experiments, benchmarks, ablations, and progressive tests. |
-| `special-egress-routing` | Prove both positive special routing and negative ordinary-route isolation. |
-| `proxy-client-governance` | Reconcile application settings, generated config, runtime, and observed client traffic. |
-| `proxy-stack-acceptance` | Decide readiness, security status, remaining gaps, rollback confidence, and freeze. |
+See the [routing and lifecycle diagram](README.md#路由与生命周期).
 
 ## Support matrix
 
@@ -80,7 +118,7 @@ Later evidence outranks earlier declarations. A value in a file does not prove r
 
 Never commit real addresses, domains, account names, private keys, UUIDs, protocol credentials, subscription URLs, tokens, panel paths, controller secrets, provider credentials, or exit addresses. Use documentation networks, `example.com`, synthetic fixtures, and `<REDACTED_...>` placeholders. Do not ingest a secret merely to produce a sanitized copy. See [secret handling](docs/methodology/secret-handling.md).
 
-## Quick start
+## Workflow checklist
 
 1. Start with `proxy-stack-lifecycle` and record the capability matrix and action class.
 2. Follow the selected next Skill; load only the references required by that branch.
