@@ -1,10 +1,55 @@
 # VPS 自建代理运维指南
 
-`vps-proxy-ops` · VPS Proxy Ops
+用 8 个 Agent Skills（智能体技能），按证据定位 VPS、3X-UI / Xray 与 Clash Verge / Mihomo 的代理故障，并通过隔离测试和端到端验收减少改坏现有链路的风险。
 
-[English](README.en.md)
+`vps-proxy-ops` · VPS Proxy Ops · 面向中文用户 · [English](README.en.md)
 
-一套面向中文用户的 VPS 自建代理运维工作流与 Agent Skills（智能体技能），判断以实际运行证据为准。
+## 适用场景
+
+- 买了第一台 VPS，不知道该从哪里下手排查。
+- 节点突然连不上，搞不清是 VPS 路由、面板、Xray，还是客户端规则出了问题。
+- 正在使用 Windows，或部分验证过的 Linux 客户端，搭配 3X-UI + Xray 与 Clash Verge / Mihomo。
+- 想测试 Reality、Hysteria2、TUIC、XHTTP 等传输方式，但不想碰坏正在用的生产节点。
+- 需要接入 Cloudflare、处理 TLS 证书、配置静态或住宅出口，或者调整 TUN 与 Fake-IP。
+- 让 AI Agent 协助排障，但要求 Agent 按顺序找证据，不能盲目修改生产环境。
+
+## 30 秒 Quick Start
+
+将本仓库下载或克隆到本地，让能读取本地文件的 Agent 执行下面的提示词：
+
+```bash
+git clone https://github.com/RedpoQ/vps-proxy-ops.git
+```
+
+```text
+请读取 vps-proxy-ops/README.md 和
+vps-proxy-ops/skills/proxy-stack-lifecycle/SKILL.md，按该 Skill 开始只读梳理。
+先询问缺失的客户端、VPS、面板与故障现象信息，确认 Agent 是否依赖当前代理。
+输出事实、推断、未知、当前生命周期阶段、阻塞项与下一步 Skill。
+不要索取密码、私钥或完整订阅；不要安装软件、重启服务或修改生产配置。
+涉及变更时，先给出基线、备份、回滚与验证方案，再等待我的明确授权。
+```
+
+这一步开始的是工作流梳理。若 Agent 无法读取本地文件，先打开下方 Skill 入口阅读；当前 portable plugin 安装与模型自动激活验证仍未完成。已集成 Skills 的 Agent 可按名称调用 `proxy-stack-lifecycle`。
+
+## 8 个 Skills 路由表
+
+状态不明时从总入口开始；问题明确时直接进入对应 Skill，只加载该分支需要的参考资料。
+
+| 遇到这类情况 | 先用这个 Skill | 它做什么 |
+| :--- | :--- | :--- |
+| 新部署、状态不明，或不知道从哪里开始 | [`proxy-stack-lifecycle`](skills/proxy-stack-lifecycle/SKILL.md) | 只读梳理资源、当前阶段与 Agent 代理依赖，选择下一步 |
+| 评估 VPS 地区或线路，或者连接很慢 | [`vps-region-fit`](skills/vps-region-fit/SKILL.md) | 测量 RTT、抖动、丢包、TCP/TLS、UDP 可达性和路径污染，用数据比较线路 |
+| SSH 能连，但系统时钟、DNS 或基础网络行为异常 | [`vps-baseline`](skills/vps-baseline/SKILL.md) | 检查 Linux VPS 正确性，确认 resolver ownership、网卡与路由状态，不做无证据调优 |
+| 面板显示正常，但订阅拉出来的节点连不上 | [`xui-xray-stack`](skills/xui-xray-stack/SKILL.md) | 梳理 3X-UI、持久化 DB、模板、Xray runtime 与订阅投影之间的断点 |
+| 想尝试新协议，担心把现有可用节点搞崩 | [`proxy-transport-lab`](skills/proxy-transport-lab/SKILL.md) | 使用 Shadow Test 隔离测试，单变量对比，Shadow 通过后，经授权再做少量生产 smoke test |
+| 某些网站需要固定 IP 或住宅代理分流 | [`special-egress-routing`](skills/special-egress-routing/SKILL.md) | 核对服务端专用出口，并反向验证普通流量没有误走特殊出口 |
+| 节点连通，但浏览器打不开网页，或 TUN 抓不到流量 | [`proxy-client-governance`](skills/proxy-client-governance/SKILL.md) | 治理 Clash Verge / Mihomo，理清 TUN、Fake-IP 与分流规则 |
+| 以为修好了，想确认整条链路到底能不能交付 | [`proxy-stack-acceptance`](skills/proxy-stack-acceptance/SKILL.md) | 执行端到端验收；阻塞性验收项通过后，决定是否进入 `FREEZE` |
+
+---
+
+## 证据驱动的方法论
 
 面板显示正常，不代表配置生成正确；生成配置写对了，不代表运行时已经加载生效；运行时显示在线，真实流量依然可能在客户端规则、DNS 或运营商线路上出问题。
 
@@ -24,19 +69,6 @@ Observed traffic（观测到的真实流量）
 
 先确认问题出在哪一层，再改哪一层。改动前留下基线与备份，改动后保留回滚路径。
 
----
-
-## 适合谁，不适合谁
-
-**适合这样的场景：**
-
-- 买了第一台 VPS，不知道该从哪里下手排查。
-- 节点突然连不上，搞不清是 VPS 路由、面板、Xray，还是客户端规则出了问题。
-- 正在使用 Windows，或部分验证过的 Linux 客户端，搭配 3X-UI + Xray 与 Clash Verge / Mihomo。
-- 想测试 Reality、Hysteria2、TUIC、XHTTP 等传输方式，但不想碰坏正在用的生产节点。
-- 需要接入 Cloudflare、处理 TLS 证书、配置静态或住宅出口，或者调整 TUN 与 Fake-IP。
-- 让 AI Agent 协助排障，但要求 Agent 按顺序找证据，不能盲目修改生产环境。
-
 **本项目不包含以下内容：**
 
 - **不把一键脚本作为主要交付方式**：不同环境之间差异很大，直接跳过中间状态会增加排障难度。
@@ -47,23 +79,24 @@ Observed traffic（观测到的真实流量）
 
 ---
 
-## 快速指引
+## 路由与生命周期
 
-如果你不知道问题在哪一层，先调用 `proxy-stack-lifecycle`。
+先完成基线与最小可用代理，按需进入实验或特殊出口分支，再做客户端集成和验收；已知故障从路由表直达对应 Skill。
 
-它会检查当前阶段，核对手里可用的资源（VPS、域名、Cloudflare、客户端），并确认执行排查的 Agent 是否依赖当前代理，避免改挂代理后把自己一起断开。这个 Skill 只做梳理与引导，不改生产配置。
-
-如果问题已经很明确，直接对照下表：
-
-| 遇到这类情况 | 先用这个 Skill | 它做什么 |
-| :--- | :--- | :--- |
-| 刚拿到 VPS，不知道选哪个机房，或者连上去很慢 | `vps-region-fit` | 测量 RTT、抖动、丢包、TCP/TLS、UDP 可达性和路径污染，用数据比较线路 |
-| SSH 能连，但系统时钟、DNS 或基础网络行为异常 | `vps-baseline` | 检查 Linux VPS 正确性，确认 resolver ownership、网卡与路由状态，不做无证据调优 |
-| 面板显示正常，但订阅拉出来的节点连不上 | `xui-xray-stack` | 梳理 3X-UI、持久化 DB、模板、Xray runtime 与订阅投影之间的断点 |
-| 想尝试新协议，担心把现有可用节点搞崩 | `proxy-transport-lab` | 使用 Shadow Test 隔离测试，单变量对比，确认可用后再做少量生产 smoke test |
-| 某些网站需要固定 IP 或住宅代理分流 | `special-egress-routing` | 配置专用出口，同时反向验证普通流量没有误走特殊出口 |
-| 节点连通，但浏览器打不开网页，或 TUN 抓不到流量 | `proxy-client-governance` | 治理 Clash Verge / Mihomo，理清 TUN、Fake-IP 与分流规则 |
-| 以为修好了，想确认整条链路到底能不能交付 | `proxy-stack-acceptance` | 执行端到端验收；阻塞性验收项通过后，决定是否进入 `FREEZE` |
+```mermaid
+flowchart TD
+    A["能力与安全发现 · proxy-stack-lifecycle"] --> B["线路适配 · vps-region-fit"]
+    B --> C["VPS 基线 · vps-baseline"]
+    C --> D["控制面 / 数据面 · xui-xray-stack"]
+    D --> E["最小可用代理"]
+    E --> F["客户端集成 · proxy-client-governance"]
+    E -. "按需：隔离实验" .-> T["proxy-transport-lab"]
+    E -. "按需：服务端特殊出口" .-> R["special-egress-routing"]
+    T -. "经授权集成与 smoke" .-> F
+    R -. "验证普通流量隔离" .-> F
+    F --> G["端到端验收 · proxy-stack-acceptance"]
+    G --> H["阻塞项通过后 FREEZE"]
+```
 
 ---
 
